@@ -14,10 +14,10 @@ class LogicMissKon:
     }
 
     CATEGORY_PATHS = {
-        "top3": "top-3-days",
-        "top7": "top-7-days",
-        "top30": "top-30-days",
-        "top60": "top-60-days",
+        "top3": "top3",
+        "top7": "top7",
+        "top30": "top30",
+        "top60": "top60",
     }
 
     @staticmethod
@@ -236,49 +236,106 @@ class LogicMissKon:
     def get_detail(url):
         try:
             session = LogicMissKon.get_session()
-            res = session.get(url, headers=LogicMissKon.HEADERS, timeout=20)
-            if res.status_code != 200:
+            soup = LogicMissKon._fetch_soup(session, url)
+            if not soup:
                 return None
-
-            soup = BeautifulSoup(res.text, "html.parser")
             title_tag = soup.select_one(
                 "h1.entry-title, .entry-title, h1.post-title, h1"
             )
             title = title_tag.get_text(strip=True) if title_tag else ""
-            content = soup.select_one(
-                ".entry-content, .post-content, .td-post-content, article, main"
-            ) or soup.body
 
             data = {"title": title, "images": [], "videos": [], "downloads": []}
-            if not content:
-                return data
+            page_urls = LogicMissKon._collect_detail_page_urls(soup, url)
+            page_soups = {url: soup}
+            index = 0
+            while index < len(page_urls):
+                page_url = page_urls[index]
+                page_soup = page_soups.get(page_url)
+                if not page_soup:
+                    page_soup = LogicMissKon._fetch_soup(session, page_url)
+                    if page_soup:
+                        page_soups[page_url] = page_soup
+                if page_soup:
+                    for discovered in LogicMissKon._collect_detail_page_urls(page_soup, url):
+                        if discovered not in page_urls:
+                            page_urls.append(discovered)
+                    page_urls = sorted(page_urls, key=LogicMissKon._detail_page_sort_key)
+                index += 1
 
-            for img_url in LogicMissKon.extract_images_from_html(str(content), url):
-                if LogicMissKon._is_content_image(img_url) and img_url not in data["images"]:
-                    data["images"].append(img_url)
+            for page_url in page_urls:
+                page_soup = soup if page_url == url else LogicMissKon._fetch_soup(session, page_url)
+                if not page_soup:
+                    continue
+                content = page_soup.select_one(
+                    ".entry-content, .post-content, .td-post-content, article, main"
+                ) or page_soup.body
+                if not content:
+                    continue
 
-            for iframe in content.select("iframe"):
-                src = urljoin(url, iframe.get("src", ""))
-                if src and src not in data["videos"]:
-                    data["videos"].append(src)
+                for img_url in LogicMissKon.extract_images_from_html(str(content), page_url):
+                    if LogicMissKon._is_content_image(img_url) and img_url not in data["images"]:
+                        data["images"].append(img_url)
 
-            for video in content.select("video source, video"):
-                src = urljoin(url, video.get("src", ""))
-                if src and src not in data["videos"]:
-                    data["videos"].append(src)
+                for iframe in content.select("iframe"):
+                    src = urljoin(page_url, iframe.get("src", ""))
+                    if src and src not in data["videos"]:
+                        data["videos"].append(src)
 
-            for a in content.select("a[href]"):
-                href = urljoin(url, a.get("href", ""))
-                if LogicMissKon._is_download_link(href):
-                    if not any(row["link"] == href for row in data["downloads"]):
-                        data["downloads"].append(
-                            {"name": a.get_text(strip=True) or "Download Link", "link": href}
-                        )
+                for video in content.select("video source, video"):
+                    src = urljoin(page_url, video.get("src", ""))
+                    if src and src not in data["videos"]:
+                        data["videos"].append(src)
+
+                for a in content.select("a[href]"):
+                    href = urljoin(page_url, a.get("href", ""))
+                    if LogicMissKon._is_download_link(href):
+                        if not any(row["link"] == href for row in data["downloads"]):
+                            data["downloads"].append(
+                                {"name": a.get_text(strip=True) or "Download Link", "link": href}
+                            )
 
             return data
         except Exception as e:
             print(f"[MissKon] get_detail error: {type(e).__name__}: {e}")
             return None
+
+    @staticmethod
+    def _fetch_soup(session, url):
+        try:
+            res = session.get(url, headers=LogicMissKon.HEADERS, timeout=20)
+            if res.status_code == 200:
+                return BeautifulSoup(res.text, "html.parser")
+        except Exception:
+            pass
+        return None
+
+    @staticmethod
+    def _collect_detail_page_urls(soup, url):
+        urls = [url]
+        selectors = [
+            ".page-links a[href]",
+            ".post-page-numbers[href]",
+            ".pagination a[href]",
+            ".entry-content a[href]",
+        ]
+        base_path = urlparse(url).path.rstrip("/")
+        for selector in selectors:
+            for tag in soup.select(selector):
+                href = urljoin(url, tag.get("href", ""))
+                parsed = urlparse(href)
+                if not LogicMissKon.is_supported_base_url(href):
+                    continue
+                path = parsed.path.rstrip("/")
+                if path == base_path or path.startswith(base_path + "/"):
+                    if href not in urls:
+                        urls.append(href)
+        return sorted(urls, key=LogicMissKon._detail_page_sort_key)
+
+    @staticmethod
+    def _detail_page_sort_key(url):
+        path = urlparse(url).path.rstrip("/")
+        last = path.split("/")[-1]
+        return int(last) if last.isdigit() else 1
 
     @staticmethod
     def _is_content_image(url):
