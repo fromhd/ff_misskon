@@ -14,10 +14,10 @@ class LogicMissKon:
     }
 
     CATEGORY_PATHS = {
-        "top3": "top3",
-        "top7": "top7",
-        "top30": "top30",
-        "top60": "top60",
+        "korean": "category/korean-model",
+        "gravure": "category/gravure",
+        "cosplay": "category/cosplay",
+        "asian": "category/asian",
     }
 
     @staticmethod
@@ -314,20 +314,15 @@ class LogicMissKon:
         urls = [url]
         selectors = [
             ".page-links a[href]",
-            ".post-page-numbers[href]",
+            ".post-page-numbers",
             ".pagination a[href]",
-            ".entry-content a[href]",
         ]
-        base_path = urlparse(url).path.rstrip("/")
         for selector in selectors:
             for tag in soup.select(selector):
                 href = urljoin(url, tag.get("href", ""))
-                parsed = urlparse(href)
-                if not LogicMissKon.is_supported_base_url(href):
-                    continue
-                path = parsed.path.rstrip("/")
-                if path == base_path or path.startswith(base_path + "/"):
-                    if href not in urls:
+                if href:
+                    href = href.split('#')[0]
+                    if LogicMissKon.is_supported_base_url(href) and href not in urls:
                         urls.append(href)
         return sorted(urls, key=LogicMissKon._detail_page_sort_key)
 

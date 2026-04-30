@@ -21,10 +21,10 @@ class ModuleMain(PluginModuleBase):
         }
         self.menu = {
             "main": "Latest",
-            "top3": "Top 3 days",
-            "top7": "Top 7 days",
-            "top30": "Top 30 days",
-            "top60": "Top 60 days",
+            "korean": "Korean",
+            "gravure": "Gravure",
+            "cosplay": "Cosplay",
+            "asian": "Asian",
             "search": "Search",
             "setting": "Setting",
             "log": "Log",
@@ -37,16 +37,16 @@ class ModuleMain(PluginModuleBase):
         arg["package_name"] = self.P.package_name
         menu_map = {
             "main": {"title": "Latest", "category": ""},
-            "top3": {"title": "Top 3 days", "category": "top3"},
-            "top7": {"title": "Top 7 days", "category": "top7"},
-            "top30": {"title": "Top 30 days", "category": "top30"},
-            "top60": {"title": "Top 60 days", "category": "top60"},
+            "korean": {"title": "Korean", "category": "korean"},
+            "gravure": {"title": "Gravure", "category": "gravure"},
+            "cosplay": {"title": "Cosplay", "category": "cosplay"},
+            "asian": {"title": "Asian", "category": "asian"},
             "search": {"title": "Search"},
             "setting": {"title": "Setting"},
             "log": {"title": "Log"},
         }
 
-        if sub in ["main", "top3", "top7", "top30", "top60"]:
+        if sub in ["main", "korean", "gravure", "cosplay", "asian"]:
             arg["title"] = menu_map[sub]["title"]
             arg["category"] = menu_map[sub]["category"]
             return render_template(f"{self.template_prefix}_main.html", arg=arg)
