@@ -14,10 +14,10 @@ class LogicMissKon:
     }
 
     CATEGORY_PATHS = {
-        "korean": "category/korean-model",
-        "gravure": "category/gravure",
-        "cosplay": "category/cosplay",
-        "asian": "category/asian",
+        "top3": "top3",
+        "top7": "top7",
+        "top30": "top30",
+        "top60": "top60",
     }
 
     @staticmethod
@@ -169,16 +169,32 @@ class LogicMissKon:
 
     @staticmethod
     def _parse_list_item(node, base_url):
-        link = node.select_one(
-            "h1 a[href], h2 a[href], h3 a[href], .entry-title a[href], a[rel='bookmark'], a[href]"
-        )
-        if not link:
+        # We need the correct post link.
+        # h1 a, h2 a, h3 a are usually the title.
+        title_tag = node.select_one("h1 a[href], h2 a[href], h3 a[href], .entry-title a[href]")
+        
+        link_href = ""
+        title = ""
+        
+        if title_tag:
+            link_href = title_tag.get("href", "")
+            title = title_tag.get_text(strip=True)
+            
+        if not link_href or not LogicMissKon._is_post_url(urljoin(base_url + "/", link_href)):
+            # Fallback: iterate all links and find the first one that is a post url.
+            for a in node.select("a[href]"):
+                href = a.get("href", "")
+                if LogicMissKon._is_post_url(urljoin(base_url + "/", href)):
+                    link_href = href
+                    if not title:
+                        title = a.get("title", "").strip() or a.get_text(strip=True)
+                    break
+                    
+        if not link_href:
             return None
-        href = urljoin(base_url + "/", link.get("href", ""))
-        if not LogicMissKon._is_post_url(href):
-            return None
-
-        title = link.get_text(strip=True)
+            
+        href = urljoin(base_url + "/", link_href)
+        
         if not title:
             img = node.select_one("img")
             title = img.get("alt", "").strip() if img else ""
