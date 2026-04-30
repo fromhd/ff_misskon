@@ -20,14 +20,14 @@ class ModuleMain(PluginModuleBase):
             "download_path": os.path.join(os.getcwd(), "downloads", "ff_misskon"),
         }
         self.menu = {
-            "main": "Latest",
-            "top3": "Top 3 days",
-            "top7": "Top 7 days",
-            "top30": "Top 30 days",
-            "top60": "Top 60 days",
-            "search": "Search",
-            "setting": "Setting",
-            "log": "Log",
+            "main": "최신",
+            "top3": "인기 (3일)",
+            "top7": "인기 (7일)",
+            "top30": "인기 (30일)",
+            "top60": "인기 (60일)",
+            "search": "검색",
+            "setting": "설정",
+            "log": "로그",
         }
         self.download_status = {}
         default_route_socketio_module(self)
@@ -36,14 +36,14 @@ class ModuleMain(PluginModuleBase):
         arg = self.P.ModelSetting.to_dict()
         arg["package_name"] = self.P.package_name
         menu_map = {
-            "main": {"title": "Latest", "category": ""},
-            "top3": {"title": "Top 3 days", "category": "top3"},
-            "top7": {"title": "Top 7 days", "category": "top7"},
-            "top30": {"title": "Top 30 days", "category": "top30"},
-            "top60": {"title": "Top 60 days", "category": "top60"},
-            "search": {"title": "Search"},
-            "setting": {"title": "Setting"},
-            "log": {"title": "Log"},
+            "main": {"title": "최신", "category": ""},
+            "top3": {"title": "인기 (3일)", "category": "top3"},
+            "top7": {"title": "인기 (7일)", "category": "top7"},
+            "top30": {"title": "인기 (30일)", "category": "top30"},
+            "top60": {"title": "인기 (60일)", "category": "top60"},
+            "search": {"title": "검색"},
+            "setting": {"title": "설정"},
+            "log": {"title": "로그"},
         }
 
         if sub in ["main", "top3", "top7", "top30", "top60"]:
@@ -95,7 +95,7 @@ class ModuleMain(PluginModuleBase):
                             self._make_proxy_url(img) for img in data["images"]
                         ]
                     return jsonify({"ret": "success", "data": data})
-                return jsonify({"ret": "error", "log": "Cannot load detail."})
+                return jsonify({"ret": "error", "log": "상세 정보를 가져올 수 없습니다."})
 
             if sub == "download":
                 url = req.form.get("url")
@@ -109,7 +109,7 @@ class ModuleMain(PluginModuleBase):
                         zip_file_path = os.path.join(target_path, f"{safe_title}.zip")
                         if os.path.exists(zip_file_path):
                             return jsonify(
-                                {"ret": "exists", "msg": "File already exists. Download again?"}
+                                {"ret": "exists", "msg": "이미 다운로드된 파일이 있습니다. 다시 받으시겠습니까?"}
                             )
 
                 if not os.path.exists(target_path):
@@ -119,7 +119,7 @@ class ModuleMain(PluginModuleBase):
                 threading.Thread(
                     target=self.download_thread, args=(url, target_path), daemon=True
                 ).start()
-                return jsonify({"ret": "success", "msg": "Download started."})
+                return jsonify({"ret": "success", "msg": "다운로드를 시작합니다. 버튼에서 진행률을 확인하세요."})
 
             if sub == "download_status":
                 url = req.form.get("url")
@@ -143,7 +143,7 @@ class ModuleMain(PluginModuleBase):
             self.P.logger.info(f"[MissKon] Download Task Started: {url}")
             data = LogicMissKon.get_detail(url)
             if not data:
-                self.download_status[url] = {"status": "error", "msg": "Detail load failed"}
+                self.download_status[url] = {"status": "error", "msg": "상세 정보 로딩 실패"}
                 return
 
             safe_title = self._safe_filename(data["title"])
