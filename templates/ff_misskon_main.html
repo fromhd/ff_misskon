@@ -30,9 +30,9 @@
     </div>
     <div id="list_div" class="row p-3"></div>
     <div id="pagination_container" class="d-flex justify-content-center p-4">
-        <button class="btn btn-outline-primary mr-2" id="btn_prev" onclick="loadPosts(currentPage > 1 ? currentPage - 1 : 1)">Prev</button>
-        <span id="page_info" class="align-self-center mx-3 font-weight-bold">Page 1</span>
-        <button class="btn btn-outline-primary" id="btn_next" onclick="loadPosts(currentPage + 1)">Next</button>
+        <button class="btn btn-outline-primary mr-2" id="btn_prev" onclick="loadPosts(currentPage > 1 ? currentPage - 1 : 1)">이전</button>
+        <span id="page_info" class="align-self-center mx-3 font-weight-bold">페이지 1</span>
+        <button class="btn btn-outline-primary" id="btn_next" onclick="loadPosts(currentPage + 1)">다음</button>
     </div>
 </div>
 
@@ -41,7 +41,7 @@
         <div class="modal-content">
             <button type="button" class="floating-close" data-dismiss="modal">&times;</button>
             <div class="modal-header bg-dark text-white py-2">
-                <h5 class="modal-title w-100 text-center pr-4" id="modal_title">Detail</h5>
+                <h5 class="modal-title w-100 text-center pr-4" id="modal_title">상세 정보</h5>
             </div>
             <div class="modal-body">
                 <div id="video_player_container" class="p-2"></div>
@@ -50,7 +50,7 @@
             </div>
             <div id="download_btn_container" class="modal-footer-fixed">
                 <button class="btn btn-success btn-block shadow-sm" id="btn_download_all">
-                    <i class="fa fa-download"></i> Download images (JPG+ZIP)
+                    <i class="fa fa-download"></i> 이미지 다운로드 (JPG+ZIP)
                 </button>
             </div>
         </div>
@@ -101,23 +101,23 @@ function startStatusPolling(url, btn) {
             success: function(status) {
                 if (status.status === 'downloading') {
                     let percent = status.total > 0 ? Math.floor((status.current / status.total) * 100) : 0;
-                    btn.html(`<i class="fa fa-spinner fa-spin"></i> Downloading (${status.current}/${status.total}, ${percent}%)`);
+                    btn.html(`<i class="fa fa-spinner fa-spin"></i> 다운로드 중 (${status.current}/${status.total}, ${percent}%)`);
                 } else if (status.status === 'zipping') {
-                    btn.html('<i class="fa fa-archive fa-spin"></i> Zipping');
+                    btn.html('<i class="fa fa-archive fa-spin"></i> 압축 중');
                 } else if (status.status === 'completed') {
-                    btn.html('<i class="fa fa-check"></i> Completed');
+                    btn.html('<i class="fa fa-check"></i> 완료');
                     btn.removeClass('btn-success').addClass('btn-primary');
                     clearInterval(interval);
                     setTimeout(() => {
-                        btn.prop('disabled', false).html('<i class="fa fa-download"></i> Download images (JPG+ZIP)');
+                        btn.prop('disabled', false).html('<i class="fa fa-download"></i> 이미지 다운로드 (JPG+ZIP)');
                         btn.removeClass('btn-primary').addClass('btn-success');
                     }, 3000);
                 } else if (status.status === 'error') {
-                    btn.html('<i class="fa fa-exclamation-triangle"></i> Error');
+                    btn.html('<i class="fa fa-exclamation-triangle"></i> 에러');
                     btn.removeClass('btn-success').addClass('btn-danger');
                     clearInterval(interval);
                     setTimeout(() => {
-                        btn.prop('disabled', false).html('<i class="fa fa-download"></i> Download images (JPG+ZIP)');
+                        btn.prop('disabled', false).html('<i class="fa fa-download"></i> 이미지 다운로드 (JPG+ZIP)');
                         btn.removeClass('btn-danger').addClass('btn-success');
                     }, 3000);
                 }
@@ -129,8 +129,8 @@ function startStatusPolling(url, btn) {
 function loadPosts(page) {
     if (page < 1) return;
     currentPage = page;
-    $("#page_info").text(current_title + " Page " + page);
-    $("#list_div").html('<div class="col-12 text-center p-5"><h4>Loading...</h4></div>');
+    $("#page_info").text(current_title + " - " + page + " 페이지");
+    $("#list_div").html('<div class="col-12 text-center p-5"><h4>로딩 중...</h4></div>');
     window.scrollTo(0, 0);
     $.ajax({
         url: '/' + package_name + '/ajax/list',
@@ -156,13 +156,13 @@ function renderList(data) {
             </div>
         `;
     });
-    $("#list_div").html(html || '<div class="col-12 text-center p-5"><h4>No posts found.</h4></div>');
+    $("#list_div").html(html || '<div class="col-12 text-center p-5"><h4>게시물이 없습니다.</h4></div>');
 }
 
 function showDetail(url) {
     currentDetailUrl = url;
-    $("#modal_title").text("Loading...");
-    $("#image_gallery").html('<div class="col-12 text-center p-5"><div class="spinner-border text-primary" role="status"></div><p class="mt-2">Loading content...</p></div>');
+    $("#modal_title").text("로딩 중...");
+    $("#image_gallery").html('<div class="col-12 text-center p-5"><div class="spinner-border text-primary" role="status"></div><p class="mt-2">콘텐츠 로딩 중...</p></div>');
     $("#video_player_container").hide().empty();
     $("#download_links").hide().empty();
     $("#download_btn_container").hide();
@@ -176,7 +176,7 @@ function showDetail(url) {
             else $("#image_gallery").html(`<div class="col-12 text-center text-danger p-5"><h4>${data.log}</h4></div>`);
         },
         error: function() {
-            $("#image_gallery").html('<div class="col-12 text-center text-danger p-5"><h4>Server error.</h4></div>');
+            $("#image_gallery").html('<div class="col-12 text-center text-danger p-5"><h4>서버 에러.</h4></div>');
         }
     });
 }
@@ -193,11 +193,11 @@ function renderDetail(detail) {
     if (displayImages.length > 0) {
         displayImages.forEach(img => $("#image_gallery").append(`<div class="col-12 text-center"><img src="${img}" class="gallery-img mb-1" loading="lazy"></div>`));
     } else {
-        $("#image_gallery").html('<div class="col-12 text-center p-3">No images found.</div>');
+        $("#image_gallery").html('<div class="col-12 text-center p-3">이미지가 없습니다.</div>');
     }
     if (detail.downloads.length > 0) {
         $("#download_links").show();
-        let dhtml = '<div class="font-weight-bold mb-2">External download links:</div>';
+        let dhtml = '<div class="font-weight-bold mb-2">외부 다운로드 링크:</div>';
         detail.downloads.forEach(d => dhtml += `<a href="${d.link}" target="_blank" class="btn btn-sm btn-info mr-2 mt-2">${d.name}</a>`);
         $("#download_links").html(dhtml);
     }

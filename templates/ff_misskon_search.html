@@ -6,8 +6,8 @@ $(document).ready(function(){
     const searchBar = `
         <div class="row p-3 bg-light border-bottom mb-3">
             <div class="col-md-8 offset-md-2 d-flex">
-                <input id="search_word" class="form-control mr-2" type="text" placeholder="Search keyword">
-                <button id="search_btn" class="btn btn-primary px-4">Search</button>
+                <input id="search_word" class="form-control mr-2" type="text" placeholder="검색어 입력">
+                <button id="search_btn" class="btn btn-primary px-4">검색</button>
             </div>
         </div>
     `;
@@ -23,8 +23,8 @@ function searchPosts(page) {
     const word = $("#search_word").val();
     if (!word) return;
     currentPage = page;
-    $("#page_info").text("Page " + page);
-    $("#list_div").html('<div class="col-12 text-center p-5"><h4>Searching...</h4></div>');
+    $("#page_info").text(page + " 페이지");
+    $("#list_div").html('<div class="col-12 text-center p-5"><h4>검색 중...</h4></div>');
     $("#pagination_container").attr('style', 'display:none !important;');
     window.scrollTo(0, 0);
     $.ajax({
@@ -36,7 +36,7 @@ function searchPosts(page) {
                 renderList(data.data);
                 $("#pagination_container").attr('style', 'display:flex !important;');
             } else {
-                $("#list_div").html('<div class="col-12 text-center p-5"><h4>No results found.</h4></div>');
+                $("#list_div").html('<div class="col-12 text-center p-5"><h4>검색 결과가 없습니다.</h4></div>');
             }
         }
     });

@@ -1,17 +1,17 @@
 {% extends "base.html" %}
 {% block content %}
 <div>
-  {{ macros.m_button_group([['global_setting_save_btn', 'Save'], ['global_one_execute_btn', 'Reset URL']]) }}
+  {{ macros.m_button_group([['global_setting_save_btn', '저장'], ['global_one_execute_btn', '주소 갱신']]) }}
   <hr>
   <form id="setting">
     <div class="tab-content">
       <div class="alert alert-primary">
         <i class="fa fa-info-circle"></i>
-        MissKon uses one official domain. Use reset if the saved value should be restored to <code>https://misskon.com</code>.
+        MissKon 접속 주소를 설정합니다. 자동 탐색을 원하시면 주소 갱신 버튼을 눌러주세요. (기본: <code>https://misskon.com</code>)
       </div>
-      {{ macros.setting_input_text('misskon_url', 'MissKon URL', value=arg['misskon_url']) }}
-      {{ macros.setting_input_text('download_path', 'Download path', value=arg['download_path']) }}
-      {{ macros.setting_checkbox('proxy_enabled', 'Use image proxy', value=arg['proxy_enabled']) }}
+      {{ macros.setting_input_text('misskon_url', '사이트 주소', value=arg['misskon_url']) }}
+      {{ macros.setting_input_text('download_path', '다운로드 경로', value=arg['download_path']) }}
+      {{ macros.setting_checkbox('proxy_enabled', '이미지 프록시 사용', value=arg['proxy_enabled']) }}
     </div>
   </form>
 </div>
@@ -37,13 +37,13 @@ $(document).ready(function(){
             data: settingFormData(),
             success: function (data) {
                 if (data) {
-                    $.notify('<strong>Saved.</strong>', {type: 'success'});
+                    $.notify('<strong>저장되었습니다.</strong>', {type: 'success'});
                 } else {
-                    $.notify('<strong>Save failed.</strong>', {type: 'warning'});
+                    $.notify('<strong>저장 실패.</strong>', {type: 'warning'});
                 }
             },
             error: function() {
-                $.notify('<strong>Server error.</strong>', {type: 'danger'});
+                $.notify('<strong>서버 에러.</strong>', {type: 'danger'});
             }
         });
     });
@@ -59,13 +59,13 @@ $(document).ready(function(){
             success: function (data) {
                 if (data && data.ret === 'success') {
                     $('[name="misskon_url"]').val(data.url);
-                    $.notify('<strong>URL reset:</strong> ' + data.url, {type: 'success'});
+                    $.notify('<strong>주소 갱신 완료:</strong> ' + data.url, {type: 'success'});
                 } else {
-                    $.notify('<strong>URL reset failed.</strong>', {type: 'warning'});
+                    $.notify('<strong>주소 갱신 실패.</strong>', {type: 'warning'});
                 }
             },
             error: function() {
-                $.notify('<strong>Server error.</strong>', {type: 'danger'});
+                $.notify('<strong>서버 에러.</strong>', {type: 'danger'});
             },
             complete: function() {
                 btn.prop('disabled', false);
