@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block content %}
+<div>
+  {{ macros.m_button_group([['global_setting_save_btn', 'Save'], ['global_one_execute_btn', 'Reset URL']]) }}
+  <hr>
+  <form id="setting">
+    <div class="tab-content">
+      <div class="alert alert-primary">
+        <i class="fa fa-info-circle"></i>
+        MissKon uses one official domain. Use reset if the saved value should be restored to <code>https://misskon.com</code>.
+      </div>
+      {{ macros.setting_input_text('misskon_url', 'MissKon URL', value=arg['misskon_url']) }}
+      {{ macros.setting_input_text('download_path', 'Download path', value=arg['download_path']) }}
+      {{ macros.setting_checkbox('proxy_enabled', 'Use image proxy', value=arg['proxy_enabled']) }}
+    </div>
+  </form>
+</div>
+
+<script type="text/javascript">
+const package_name = "{{ arg['package_name'] }}";
+
+function settingFormData() {
+    const data = $('#setting').serializeArray();
+    if (!data.some(item => item.name === 'proxy_enabled')) {
+        data.push({ name: 'proxy_enabled', value: 'False' });
+    }
+    return $.param(data);
+}
+
+$(document).ready(function(){
+    $(document).on('click', '#global_setting_save_btn', function(e){
+        e.preventDefault();
+
+        $.ajax({
+            url: '/' + package_name + '/ajax/setting_save',
+            type: 'POST',
+            data: settingFormData(),
+            success: function (data) {
+                if (data) {
+                    $.notify('<strong>Saved.</strong>', {type: 'success'});
+                } else {
+                    $.notify('<strong>Save failed.</strong>', {type: 'warning'});
+                }
+            },
+            error: function() {
+                $.notify('<strong>Server error.</strong>', {type: 'danger'});
+            }
+        });
+    });
+
+    $(document).on('click', '#global_one_execute_btn', function(e){
+        e.preventDefault();
+        const btn = $(this);
+        btn.prop('disabled', true);
+
+        $.ajax({
+            url: '/' + package_name + '/ajax/discover_url',
+            type: 'POST',
+            success: function (data) {
+                if (data && data.ret === 'success') {
+                    $('[name="misskon_url"]').val(data.url);
+                    $.notify('<strong>URL reset:</strong> ' + data.url, {type: 'success'});
+                } else {
+                    $.notify('<strong>URL reset failed.</strong>', {type: 'warning'});
+                }
+            },
+            error: function() {
+                $.notify('<strong>Server error.</strong>', {type: 'danger'});
+            },
+            complete: function() {
+                btn.prop('disabled', false);
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
