@@ -274,6 +274,7 @@ class ModuleMain(PluginModuleBase):
             response.headers["Cache-Control"] = "public, max-age=604800"
             return response
         except Exception as e:
+            self.P.logger.error(f"[MissKon] Image Proxy Exception: {e} ({target_url})")
             return str(e), 500
 
     def _safe_filename(self, name):

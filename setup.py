@@ -10,6 +10,7 @@ REQUIRED_PACKAGES = [
     ("cloudscraper", "cloudscraper"),
     ("beautifulsoup4", "bs4"),
     ("lxml", "lxml"),
+    ("PySocks", "socks"),
 ]
 
 

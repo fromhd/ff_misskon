@@ -78,8 +78,12 @@ class LogicMissKon:
                 items = LogicMissKon._parse_api_list(base_url, page, search)
                 if items:
                     return items
-            except Exception:
-                pass
+            except Exception as e:
+                try:
+                    from .setup import P
+                    P.logger.error(f"[MissKon] API List Error: {e}")
+                except:
+                    pass
 
         return LogicMissKon.parse_html_list(base_url, page, search, category)
 
@@ -141,7 +145,18 @@ class LogicMissKon:
                 if candidate.status_code == 200:
                     res = candidate
                     break
-            except Exception:
+                else:
+                    try:
+                        from .setup import P
+                        P.logger.error(f"[MissKon] HTML List HTTP {candidate.status_code}: {url}")
+                    except:
+                        pass
+            except Exception as e:
+                try:
+                    from .setup import P
+                    P.logger.error(f"[MissKon] HTML List Exception: {e} ({url})")
+                except:
+                    pass
                 continue
         if not res:
             return []
@@ -336,8 +351,18 @@ class LogicMissKon:
             res = session.get(url, headers=LogicMissKon.HEADERS, timeout=20)
             if res.status_code == 200:
                 return BeautifulSoup(res.text, "html.parser")
-        except Exception:
-            pass
+            else:
+                try:
+                    from .setup import P
+                    P.logger.error(f"[MissKon] Detail fetch HTTP {res.status_code}: {url}")
+                except:
+                    pass
+        except Exception as e:
+            try:
+                from .setup import P
+                P.logger.error(f"[MissKon] Detail fetch exception: {e} ({url})")
+            except:
+                pass
         return None
 
     @staticmethod
