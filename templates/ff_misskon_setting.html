@@ -10,6 +10,7 @@
         MissKon 접속 주소를 설정합니다. 자동 탐색을 원하시면 주소 갱신 버튼을 눌러주세요. (기본: <code>https://misskon.com</code>)
       </div>
       {{ macros.setting_input_text('misskon_url', '사이트 주소', value=arg['misskon_url']) }}
+      {{ macros.setting_input_text('proxy_url', '프록시 주소', value=arg['proxy_url'], desc='misskon.com 접속이 차단된 경우 프록시 서버 주소를 입력하세요. (예: http://proxy-ip:port)') }}
       {{ macros.setting_input_text('download_path', '다운로드 경로', value=arg['download_path']) }}
       {{ macros.setting_checkbox('proxy_enabled', '이미지 프록시 사용', value=arg['proxy_enabled']) }}
     </div>

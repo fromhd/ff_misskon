@@ -16,6 +16,7 @@ class ModuleMain(PluginModuleBase):
         super(ModuleMain, self).__init__(P, name="main")
         self.db_default = {
             "misskon_url": LogicMissKon.BASE_URL,
+            "proxy_url": "",
             "proxy_enabled": "True",
             "download_path": os.path.join(os.getcwd(), "downloads", "ff_misskon"),
         }

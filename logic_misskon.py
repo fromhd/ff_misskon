@@ -23,13 +23,28 @@ class LogicMissKon:
     @staticmethod
     def get_session():
         try:
+            from .setup import P
+            proxy_url = P.ModelSetting.get("proxy_url")
+        except Exception:
+            proxy_url = None
+
+        proxies = {}
+        if proxy_url:
+            proxies = {"http": proxy_url, "https": proxy_url}
+
+        try:
             import cloudscraper
 
-            return cloudscraper.create_scraper(
+            session = cloudscraper.create_scraper(
                 browser={"browser": "chrome", "platform": "windows", "desktop": True}
             )
         except Exception:
-            return requests.Session()
+            session = requests.Session()
+
+        if proxies:
+            session.proxies.update(proxies)
+
+        return session
 
     @staticmethod
     def is_supported_base_url(url):
